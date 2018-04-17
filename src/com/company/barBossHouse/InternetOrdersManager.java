@@ -498,10 +498,10 @@ public class InternetOrdersManager implements Deque<Order>,OrdersManager{
     public Iterator<Order> descendingIterator() {
         return new Iterator<Order>() {
             ListNode node = tail;
-            int pos = size;
+            int pos = size - 1;
 
             public boolean hasNext() {
-                return pos>0;
+                return pos>-1;
             }
 
             public Order next() {
