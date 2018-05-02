@@ -73,7 +73,7 @@ public final class Address {
     }
     //endregion
 
-    public String toString() { //todo через операторы
+    public String toString() {
         StringBuilder toString = new StringBuilder("Address: ");
         if (!city.equals(DEFAULT_STRING)) {
             toString.append(city);

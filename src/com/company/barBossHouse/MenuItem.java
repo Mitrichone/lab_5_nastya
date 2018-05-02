@@ -18,7 +18,7 @@ public abstract class MenuItem implements Comparable<MenuItem>{
         this.description=description;
     }
 
-    public int getCost(){ //todo get & set
+    public int getCost(){
         return cost;
     }
     public String getName(){
@@ -30,16 +30,7 @@ public abstract class MenuItem implements Comparable<MenuItem>{
 
     @Override
     public int compareTo(MenuItem o){
-        return Integer.compare(getCost(), o.getCost());
-      /*
-          if(o.getCost()==getCost()){
-          return 0;
-      }else if(o.getCost()<getCost()){
-            return 1;
-      }else{
-          return -1;
-      }
-       */
+        return getCost() - o.getCost();
     }
     public String toString() {
         return String.format("%1$s%2$s%3$d", !name.isEmpty() ? name : "",",", cost!=DEFAULT_COST ? cost : "").trim();

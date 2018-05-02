@@ -38,19 +38,8 @@ public  class InternetOrder implements Order{
 
     }
     @Override
-    public boolean add(MenuItem item){/*throws UnlawfulActionException{
+    public boolean add(MenuItem item){
 
-        if(item instanceof Drink){
-            Drink drink = (Drink)item;
-            if (drink.isItAlcoholic() && customer.getAge() < 18) {
-                {
-                    throw new UnlawfulActionException("Продажа алкоголя несовершеннолетним запрещена по закону!");
-                }
-            }
-            if (drink.isItAlcoholic() && getDateTime().getHour()>22 ||  getDateTime().getHour()<6 ) {
-                throw new UnlawfulActionException("Продажа алкоголя после 22:00 запрещена по закону!");
-            }
-        }*/
         ListNode node = new ListNode(item, null);
         if (head == null) {
             head = node;
@@ -114,6 +103,25 @@ public  class InternetOrder implements Order{
 
     @Override
     public MenuItem remove(int index) {
+        ListNode node = head;
+        int count=0;
+        if(index>=size || index<0){
+            throw new IndexOutOfBoundsException();
+        }
+        while(node.next != null) {
+         if(count==index){
+             MenuItem item = node.item;
+             if(tail == node.next)
+             {
+                 tail = node;
+             }
+             node.next = node.next.next;
+             size--;
+             return item;
+         }
+         node = node.next;
+         count++;
+        }
         return null;
     }
 
@@ -129,23 +137,6 @@ public  class InternetOrder implements Order{
         }
         return false;
     }
-    public boolean remove(String itemName){
-        ListNode node = head;
-        while (node.next != null) {
-            if (node.next.item.getName().equals(itemName)) {
-                if(tail == node.next)
-                {
-                    tail = node;
-                }
-                node.next = node.next.next;
-                size--;
-                return true;
-            }
-            node = node.next;
-        }
-        return false;
-    }
-
     public boolean remove (MenuItem item){
         ListNode node = head;
         while (node.next != null) {
@@ -257,28 +248,12 @@ public  class InternetOrder implements Order{
 
     @Override
     public void clear() {
-        head = null;
-        tail = null;
-        size = 0;
-    }
-
-    public int removeAll(String itemName){
-        int count=0;
         ListNode node = head;
-        while (node.next != null) {
-            if (node.next.item.getName().equals(itemName)) {
-                if(tail == node.next)
-                {
-                    tail = node;
-                }
-                node.next = node.next.next;
-                size--;
-                count++;
-            }
-            node = node.next;
+        while(node.next!=null){
+            node=null;
+            node=node.next;
         }
-
-        return count;
+        size = 0;
     }
 
    public int size(){
@@ -410,7 +385,7 @@ public  class InternetOrder implements Order{
     }
     return dishesNames;
 }
-    public MenuItem[] sortedByCost(){
+    public MenuItem[] sort(){
         MenuItem[]items = items();
         Arrays.sort(items,MenuItem::compareTo);
         return items;
@@ -512,10 +487,10 @@ public  class InternetOrder implements Order{
             }
 
             public MenuItem next() {
-                MenuItem employee = node.item;
+                MenuItem item = node.item;
                 node = node.next;
                 pos++;
-                return employee;
+                return item;
             }
 
             public boolean hasPrevious() {
@@ -572,7 +547,7 @@ public  class InternetOrder implements Order{
     }  //new
     public void setCustomer(Customer customer) {
         InternetOrder.customer = customer;
-    }  //new
+    }
 
     public LocalDateTime getDateTime() {
         return dateTime;

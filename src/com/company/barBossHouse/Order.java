@@ -2,7 +2,6 @@ package com.company.barBossHouse;
 
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.function.UnaryOperator;
 
 public interface Order extends List<MenuItem>{
 
@@ -12,31 +11,12 @@ public interface Order extends List<MenuItem>{
     Iterator<MenuItem> iterator();
     MenuItem[] items();
 
-    boolean add(MenuItem newItem);// throws UnlawfulActionException;
+    boolean add(MenuItem newItem);
     void add(int index, MenuItem element);
     MenuItem remove(int index);
-    boolean remove(String name);
     boolean remove(MenuItem item);
     boolean containsAll(Collection<?> c);
-    int removeAll(String i_name);
-    int removeAll(MenuItem item);
-
-    default void replaceAll(UnaryOperator<MenuItem> operator) {
-        Objects.requireNonNull(operator);
-        final ListIterator<MenuItem> li = this.listIterator();
-        while (li.hasNext()) {
-            li.set(operator.apply(li.next()));
-        }
-    }
-    default void sort( MenuItem c) {
-        Object[] a = this.toArray();
-        Arrays.sort(a, (Comparator) c);
-        ListIterator<MenuItem> i = this.listIterator();
-        for (Object e : a) {
-            i.next();
-            i.set((MenuItem) e);
-        }
-    }
+    boolean removeAll(Collection<?> c);
     void clear();
     boolean equals(Object obj);
     int hashCode();
@@ -47,14 +27,12 @@ public interface Order extends List<MenuItem>{
     ListIterator<MenuItem> listIterator();
     ListIterator<MenuItem> listIterator(int index);
     List<MenuItem> subList(int fromIndex, int toIndex);
-    default Spliterator<MenuItem> spliterator() {
-        return Spliterators.spliterator(this, Spliterator.ORDERED);
-    }
+
     int TotalCost();
     int numOfItems(String item);
     int numOfItems(MenuItem item);
     String[] itemsNames();
-    MenuItem[] sortedByCost();
+    MenuItem[] sort();
     String toString();
     boolean hasAlcoholicDrink();
     Customer getCustomer();

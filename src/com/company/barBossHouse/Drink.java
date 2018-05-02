@@ -40,7 +40,6 @@ public class Drink extends MenuItem implements Alcoholable{
     }
     public boolean equals(Object obj) {
         //если у них одинаковый тип, стоимость, имена и процент спирта совпадают
-                //todo вызывать из суперкласса in dish
         if(super.equals(obj)) {
             Drink drink = (Drink) obj;
             return drink.drinkType == drinkType &&

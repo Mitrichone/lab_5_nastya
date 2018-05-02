@@ -27,19 +27,11 @@ public class TableOrder implements Order{
         this.customer = customer;
         dateTime = LocalDateTime.now();
     }
-    public TableOrder(MenuItem[] menuItems, Customer customer)throws UnlawfulActionException{
+    public TableOrder(MenuItem[] menuItems, Customer customer){
 
         for(int i = 0; i< items.length; i++){
             if(menuItems[i]instanceof Drink) {
                 Drink drink = (Drink) menuItems[i];
-                if (drink.isItAlcoholic() & customer.getAge() < 18) {
-                    {
-                        throw new UnlawfulActionException("Продажа алкоголя несовершеннолетним запрещена по закону!");
-                    }
-                }
-                if (getDateTime().isAfter((LocalDateTime.of(getDateTime().toLocalDate(), LocalTime.of(22, 0))))) {
-                        throw new UnlawfulActionException("Продажа алкоголя после 22:00 запрещена по закону!");
-                }
 
             }
             items[i]=menuItems[i];
@@ -85,43 +77,49 @@ public class TableOrder implements Order{
 
      //region все аdd
     public void add(int index, MenuItem element) {
-     if(index<0 || index>=size())throw new IndexOutOfBoundsException();
-     if(element==null)throw  new NullPointerException();
-     items[index]=element;
-    }
+     //todo расширь массив и вообще операцию expand вынеси в отдельный приватный метод
+        if(element == null)throw new NullPointerException();
+        if(index < 0 || index >= size - 1)
+            throw new IndexOutOfBoundsException();
 
-    public boolean add(MenuItem newItem){
-        if(newItem==null)throw new NullPointerException();
-        if(items.length==0){
-            MenuItem[]newItems = new MenuItem[1];
-            newItems[0]=newItem;
-            items=newItems;
-            return true;
-        } else if(items.length>size)
-        {
-            items[size] = newItem;
+        expand(0);
+        if(index < size - 1)
+            System.arraycopy(items, index, items, index + 1, size - (index + 1));
+
+        items[index] = element;
+        if(size < items.length)
             size++;
-            return true;
-        } else
-        {
-            MenuItem[] newItems = new MenuItem[items.length * 2];
-            arraycopy(items, 0, newItems, 0, items.length);
-            newItems[items.length] = newItem;
+    }
+    private void expand(int addSize){
+        if (size + addSize > items.length){
+            MenuItem[] newItems = new MenuItem[this.size * 2 + addSize];
+            System.arraycopy(items, 0, newItems, 0, this.size);
             items = newItems;
-            return true;
         }
+    }
+    public boolean add(MenuItem newItem){
+        if(hasItem(newItem))return false;
+
+        expand(0);
+
+        items[size] = newItem;
+        size++;
+        return true;
+    }
+    public boolean hasItem(MenuItem item){
+        for(int i = 0; i < size; i++) {
+            if (items[i].equals(item))return true;
+        }
+        return false;
     }
 
     public boolean addAll(Collection<? extends MenuItem> c) {
-        boolean addAll = true;
+        boolean addAll = false;
 
-        if(size + c.size() > items.length){
-            MenuItem[] newEmployees = new MenuItem[size+c.size()];
-            System.arraycopy(this.items, 0, newEmployees, 0, this.size);
-            this.items = newEmployees;
-        }
+        expand(c.size());
+
         for (MenuItem item: c) {
-            addAll &= add(item);
+            addAll |= add(item);
         }
         return addAll;
     }
@@ -143,8 +141,12 @@ public class TableOrder implements Order{
         if(c.size() == 0)
             return false;
 
-        for (Object o : c) {
-            items[index++] = (MenuItem) o;
+        for (MenuItem o : c) {
+            //todo проверить сначала наличие items
+            if(!contains(o)) {
+                items[index++] = o;
+                size++;
+            }
         }
         size += c.size();
         return true;
@@ -164,16 +166,6 @@ public class TableOrder implements Order{
         }
         return false;
     }
-    public boolean remove(String name) {
-        for (int i = 0; i < size; i++) {
-            if (items[i].getName().equals(name)) {
-                arraycopy(items, i+1, items, i, size-i-1);
-                size--;
-                return true;
-            }
-        }
-        return false;
-    }
     public boolean remove(MenuItem item) {
         for (int i = 0; i < size; i++) {
             if (items[i].equals(item)) {
@@ -183,7 +175,7 @@ public class TableOrder implements Order{
             }
         }
         return false;
-    }  //new
+    }
     public MenuItem remove(int index) {
        if(index<0 || index>=size){
            throw new IndexOutOfBoundsException();
@@ -193,49 +185,17 @@ public class TableOrder implements Order{
         size--;
         return previous;
     }
-    public boolean removeAll(Collection<?> c) {
-        Iterator<MenuItem> iterator = iterator();
+    //todo foreach по c
+    public boolean removeAll(Collection<?> c){
         boolean changed = false;
-        while(iterator.hasNext()) {
-            MenuItem item = iterator.next();
-
-            for (int i = 0; i < size; i++) {
-                if (item.equals(items[i])) {
-                    remove(i);
-                    changed = true;
-                    break;
-                }
+        for (Object o: c) {
+            if(contains(o)){
+                remove(o);
+                changed = true;
             }
         }
         return changed;
     }
-    public int removeAll(MenuItem item) {
-        int count=0;
-        for(int i=0;i<size;i++){
-            if(items[i].equals(item))
-            {
-                arraycopy(items, i+1, items, i, size-i-1);
-                size--;
-                count++;
-                i--;
-            }
-        }
-        return count;
-    }
-    public int removeAll(String i_name) {
-        int count=0;
-        for(int i=0;i<size;i++){
-            if(items[i].getName().equals(i_name))
-            {
-                arraycopy(items, i+1, items, i, size-i-1);
-                size--;
-                count++;
-                i--;
-            }
-        }
-        return count;
-    }
-
     //endregion
 
      //region contain
@@ -255,20 +215,12 @@ public class TableOrder implements Order{
         return true;
     }
     //endregion
-
+     //todo foreach по c
     public boolean retainAll(Collection<?> c) {
         boolean changed = false;
-        for(int i = 0; i < size; i++) {
-            Iterator<?> iterator = c.iterator();
-            boolean hasItem = false;
-            while (iterator.hasNext()) {
-                if (items[i].equals(iterator.next())) {
-                    hasItem = true;
-                    break;
-                }
-            }
-            if (!hasItem) {
-                remove(i);
+        for (MenuItem o: items) {
+            if(!c.contains(o)){
+                remove(o);
                 changed = true;
             }
         }
@@ -302,13 +254,32 @@ public class TableOrder implements Order{
         TableOrder tableOrder = this;
         return new ListIterator<MenuItem>() {
             int pos = index;
+            int elementPos = 0;
+            ListIteratorOperation lastOperation = ListIteratorOperation.NONE;
+            private void illegalState(){
+                switch (lastOperation){
+                    case NONE:
+                        throw new IllegalStateException("Не были вызваны методы \"next()\" или \"previous()\"");
+                    case ADD:
+                        throw new IllegalStateException("Последний вызов: \"add()\"");
+                    case REMOVE:
+                        throw new IllegalStateException("Последний вызов: \"remove()\"");
+                }
+            }
 
             public boolean hasNext() {
-                return items.length > pos;
+                return size-1 > pos;
             }
 
             public MenuItem next() {
-                return items[pos++];
+                switch (lastOperation) {
+                    case ADD:
+                        lastOperation = ListIteratorOperation.NEXT;
+                        return items[pos];
+                    default:
+                        lastOperation = ListIteratorOperation.NEXT;
+                        return items[(pos + 1 > size - 1)?(size - 1):pos++];
+                }
             }
 
             public boolean hasPrevious() {
@@ -316,7 +287,15 @@ public class TableOrder implements Order{
             }
 
             public MenuItem previous() {
-                return items[pos--];
+                switch (lastOperation) {
+                    case ADD:
+                        lastOperation = ListIteratorOperation.PREVIOUS;
+                        pos = elementPos;
+                        return items[pos];
+                    default:
+                        lastOperation = ListIteratorOperation.PREVIOUS;
+                        return items[(pos - 1 < 0)?0:pos--];
+                }
             }
 
             public int nextIndex() {
@@ -328,53 +307,92 @@ public class TableOrder implements Order{
             }
 
             public void remove() {
-                tableOrder.remove(pos);
+                switch (lastOperation) {
+                    case NEXT:
+                        tableOrder.remove(--pos);
+                        break;
+                    case PREVIOUS:
+                        tableOrder.remove(pos + 1);
+                        break;
+                    default:
+                        illegalState();
+                }
+                lastOperation = ListIteratorOperation.REMOVE;
             }
 
             public void set(MenuItem employee) {
-                tableOrder.set(pos, employee);
+                switch (lastOperation) {
+                    case NEXT:
+                        tableOrder.set(pos - 1, employee);
+                        break;
+                    case PREVIOUS:
+                        tableOrder.set(pos + 1, employee);
+                        break;
+                    default:
+                        illegalState();
+                }
+                lastOperation = ListIteratorOperation.SET;
             }
 
-            public void add(MenuItem employee) {
-                tableOrder.add(pos, employee);
+            public void add(MenuItem item) {
+                if(size == 0) {
+                    tableOrder.add(item);
+                }
+                else{
+                    switch (lastOperation){
+                        case NONE:
+                            tableOrder.add(0, item);
+                            pos++;
+                            break;
+                        case NEXT:
+                            elementPos = pos - 1;
+                            if(pos - 1 < 0)
+                                tableOrder.add(0, item);
+                            else
+                                tableOrder.add(elementPos, item);
+                            pos++;
+                            break;
+                        case PREVIOUS:
+                            elementPos = pos + 2;
+                            if(pos + 2 > size - 1)
+                                tableOrder.add(item);
+                            else
+                                tableOrder.add(elementPos, item);
+                            break;
+                    }
+                }
+                lastOperation = ListIteratorOperation.ADD;
             }
         };
     }
 
     public List<MenuItem> subList(int fromIndex, int toIndex) {
-        if(fromIndex < 0 || toIndex > size || fromIndex > toIndex)
+        if(fromIndex < 0 || toIndex > size - 1 || fromIndex > toIndex)
             throw new IndexOutOfBoundsException();
         if(fromIndex == toIndex)
-            return null;
+            return new TableOrder(); //todo пустой tableOrder
 
-        List<MenuItem> subList = new ArrayList<>();
-        ListIterator<MenuItem> iterator = listIterator(fromIndex);
+        //todo order но с заданными item
 
-        while(iterator.previousIndex() < toIndex)
-            subList.add(iterator.next());
+        TableOrder subList = new TableOrder();
+
+        subList.customer = customer;
+        subList.dateTime = dateTime;
+        subList.items = new MenuItem[toIndex - fromIndex];
+
+        for (int i = fromIndex, j = 0; i < toIndex; i++, j++)
+            subList.items[j] = items[i];
+
+        subList.size = toIndex - fromIndex;
 
         return subList;
     }
 
-   //region unlawfulEx
-/*
-    public boolean add(MenuItem newItem)throws UnlawfulActionException {
-        if(newItem instanceof Drink){
-            Drink drink = (Drink)newItem;
-            if (drink.isItAlcoholic() & customer.getAge() < 18) {
-                {
-                    throw new UnlawfulActionException("Продажа алкоголя несовершеннолетним запрещена по закону!");
-                }
-            }
-            if (getDateTime().isAfter((LocalDateTime.of(getDateTime().toLocalDate(), LocalTime.of(22, 0))))) {
-                throw new UnlawfulActionException("Продажа алкоголя после 22:00 запрещена по закону!");
-            }
-        }
-*/
-   //endregion
-
+   //todo  ручками делаешь каждый элемент = null
     public void clear() {
-        items = new MenuItem[items.length];
+        for (int i = 0; i < size; i++) {
+            items[i] = null;
+        }
         size = 0;
     }
 
@@ -466,22 +484,9 @@ public class TableOrder implements Order{
         return itemNames;
     }
 
-    public MenuItem[] sortedByCost(){
+    public MenuItem[] sort(){
         MenuItem[]items = items();
-        for (int i = this.items.length-1; i>=0; i--) //sorry but bubble sort
-        {
-            for (int j=0; j<i; j++) {
-                if (items[i] != null) {
-                    if (items[j] != null) {
-                        if (items[j].getCost() < items[j + 1].getCost()) {
-                            MenuItem tmp = items[j];
-                            items[j] = items[j + 1];
-                            items[j + 1] = tmp;
-                        }
-                    }
-                }
-            }
-        }
+        Arrays.sort(items,MenuItem::compareTo);
         return items;
     }
 
