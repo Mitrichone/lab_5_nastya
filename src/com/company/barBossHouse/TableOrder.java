@@ -19,11 +19,11 @@ public class TableOrder implements Order{
         size=0;
         dateTime = LocalDateTime.now();
     }
-    public TableOrder(int num, Customer customer)throws NegativeSizeException {
-        if(num<0)
+    public TableOrder(int capacity, Customer customer)throws NegativeSizeException {
+        if(capacity<0)
             throw new NegativeSizeException("Размер массива не может быть отрицательным");
-        items = new MenuItem[num];
-        size = 0;
+        items = new MenuItem[capacity];
+        this.size = 0;
         this.customer = customer;
         dateTime = LocalDateTime.now();
     }
@@ -48,13 +48,10 @@ public class TableOrder implements Order{
     }
     public MenuItem set(int index, MenuItem element) {
         /**
-         * @throws NullPointerException if the specified element is null and
-         *         this list does not permit null elements
          * @throws IndexOutOfBoundsException if the index is out of range
          *         (<tt>index &lt; 0 || index &gt;= size()</tt>)
          *         **/
-        if(element == null)throw new NullPointerException();
-        if(index<0 || index ==size())throw new IndexOutOfBoundsException();
+        if(index<0 || index >=size)throw new IndexOutOfBoundsException();
         MenuItem previous = items[index];
         items[index]=element;
         return previous;
@@ -166,16 +163,6 @@ public class TableOrder implements Order{
         }
         return false;
     }
-    public boolean remove(MenuItem item) {
-        for (int i = 0; i < size; i++) {
-            if (items[i].equals(item)) {
-                arraycopy(items, i+1, items, i, size-i-1);
-                size--;
-                return true;
-            }
-        }
-        return false;
-    }
     public MenuItem remove(int index) {
        if(index<0 || index>=size){
            throw new IndexOutOfBoundsException();
@@ -189,10 +176,8 @@ public class TableOrder implements Order{
     public boolean removeAll(Collection<?> c){
         boolean changed = false;
         for (Object o: c) {
-            if(contains(o)){
-                remove(o);
-                changed = true;
-            }
+                if (remove(o))
+                    changed = true;
         }
         return changed;
     }
@@ -367,28 +352,18 @@ public class TableOrder implements Order{
     }
 
     public List<MenuItem> subList(int fromIndex, int toIndex) {
-        if(fromIndex < 0 || toIndex > size - 1 || fromIndex > toIndex)
+        if(fromIndex < 0 || toIndex > size - 1 )
             throw new IndexOutOfBoundsException();
-        if(fromIndex == toIndex)
-            return new TableOrder(); //todo пустой tableOrder
-
-        //todo order но с заданными item
-
-        TableOrder subList = new TableOrder();
-
-        subList.customer = customer;
+        if(fromIndex > toIndex)
+            throw new IllegalArgumentException();
+        TableOrder subList = new TableOrder(toIndex-fromIndex, this.customer);
         subList.dateTime = dateTime;
-        subList.items = new MenuItem[toIndex - fromIndex];
-
         for (int i = fromIndex, j = 0; i < toIndex; i++, j++)
             subList.items[j] = items[i];
-
         subList.size = toIndex - fromIndex;
-
         return subList;
     }
 
-   //todo  ручками делаешь каждый элемент = null
     public void clear() {
         for (int i = 0; i < size; i++) {
             items[i] = null;
@@ -414,6 +389,7 @@ public class TableOrder implements Order{
 
             public MenuItem next() {
                 return items[pos++];
+                //todo NoSuchElementException (когда доходим до последнего элемента)
             }
         };
     }

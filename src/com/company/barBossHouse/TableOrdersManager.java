@@ -18,6 +18,7 @@ public class TableOrdersManager implements List<Order>,OrdersManager {
         tables = new TableOrder[length];
         size= DEFAULT_SIZE;
     }
+    //todo код этого метода должен быть на строчке 203
     public void add(int num, TableOrder NewOrder)throws AlreadyAddedException {
         if(!isFreeTable(num)){
             throw new AlreadyAddedException("Столик не свободен");
@@ -29,6 +30,7 @@ public class TableOrdersManager implements List<Order>,OrdersManager {
         return tables[num];
     }
 
+    //todo откуда берутся эти num?
     public void AddItem(int num, MenuItem item) throws UnlawfulActionException{
         if(item instanceof Drink){
             Drink drink = (Drink)item;
@@ -76,6 +78,8 @@ public class TableOrdersManager implements List<Order>,OrdersManager {
             public Order next() {
                 return tables[pos++];
             }
+            //todo NoSuchElementException (когда доходим до последнего элемента)
+
         };
     }
 
@@ -91,28 +95,14 @@ public class TableOrdersManager implements List<Order>,OrdersManager {
 
     @Override
     public boolean add(Order order) {
-            if(order==null)throw new NullPointerException();
-            if(tables.length==0){
-                Order[]newOrder = new Order[1];
-                newOrder[0]=order;
-                tables=newOrder;
-                return true;
-            } else if(tables.length>size)
-            {
-                tables[size] = order;
-                size++;
-                return true;
-            } else
-            {
-                return false;
-            }
+            throw new UnsupportedOperationException();
     }
 
     @Override
     public boolean remove(Object o) {
         for (int i = 0; i < size; i++) {
             if (Objects.equals(tables[i], o)) {
-                arraycopy(tables, i+1, tables, i, size-i-1);
+                tables[i] = null;
                 size--;
                 return true;
             }
@@ -131,17 +121,7 @@ public class TableOrdersManager implements List<Order>,OrdersManager {
 
     @Override
     public boolean addAll(Collection<? extends Order> c) {
-        boolean addAll = true;
-
-        if(size + c.size() > tables.length){
-            Order[] newOrders = new Order[size+c.size()];
-            System.arraycopy(this.tables, 0, newOrders, 0, this.size);
-            tables = newOrders;
-        }
-        for (Order order: c) {
-            addAll &= add(order);
-        }
-        return addAll;
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -149,23 +129,12 @@ public class TableOrdersManager implements List<Order>,OrdersManager {
         if(index < 0 || index > size)
             throw new IndexOutOfBoundsException();
 
-        if(size + c.size() > tables.length){
-            Order[] newItems = new Order[size+c.size()];
-            System.arraycopy(tables, 0, newItems, 0, tables.length);
-            tables = newItems;
-        }
-
-        if (index < size)
-            System.arraycopy(tables, index, tables, index + c.size(),
-                    tables.length - (index + c.size()));
-
-        if(c.size() == 0)
-            return false;
-
         for (Object o : c) {
             tables[index++] = (Order) o;
+            //todo AlreadyAddedException
+            //todo идешь либо до первого эксепшена, либо до конца c, либо до конца this.orders
         }
-        size += c.size();
+        //size += c.size();
         return true;
     }
 
@@ -173,9 +142,9 @@ public class TableOrdersManager implements List<Order>,OrdersManager {
     public boolean removeAll(Collection<?> c) {
         Iterator<Order> iterator = iterator();
         boolean changed = false;
+        //todo отрефакторить аналогично order
         while(iterator.hasNext()) {
             Order order = iterator.next();
-
             for (int i = 0; i < size; i++) {
                 if (order.equals(tables[i])) {
                     remove(i);
@@ -189,6 +158,7 @@ public class TableOrdersManager implements List<Order>,OrdersManager {
 
     @Override
     public boolean retainAll(Collection<?> c) {
+        //todo отрефакторить аналогично order
         boolean changed = false;
         for(int i = 0; i < size; i++) {
             Iterator<?> iterator = c.iterator();
@@ -210,22 +180,23 @@ public class TableOrdersManager implements List<Order>,OrdersManager {
     @Override
     public void clear() {
         tables = new Order[tables.length];
+        //todo ручками по массиву и null
         size = 0;
     }
 
     @Override
     public Order get(int index) {
-        if(index<0 || index==size())throw new IndexOutOfBoundsException();
+        if(index<0 || index>=size)throw new IndexOutOfBoundsException();
         return tables[index];
     }
 
     @Override
     public Order set(int index, Order element) {
         if(element == null)throw new NullPointerException();
-        if(index<0 || index ==size())throw new IndexOutOfBoundsException();
-        Order previous = tables[index];
+        if(index<0 || index >=size)throw new IndexOutOfBoundsException();
+        Order old = tables[index];
         tables[index]=element;
-        return previous;
+        return old;
     }
 
     @Override
@@ -241,8 +212,7 @@ public class TableOrdersManager implements List<Order>,OrdersManager {
             throw new IndexOutOfBoundsException();
         }
         Order previous =tables[index];
-        arraycopy(tables, index+1, tables, index, size-index-1);
-        size--;
+        tables[index] = null;
         return previous;
     }
 
@@ -271,6 +241,7 @@ public class TableOrdersManager implements List<Order>,OrdersManager {
 
     @Override
     public ListIterator<Order> listIterator(int index) {
+        //todo аналогично итератору из TableOrder
         if(index < 0 || index > size)
             throw new IndexOutOfBoundsException();
 
@@ -323,7 +294,7 @@ public class TableOrdersManager implements List<Order>,OrdersManager {
         if(fromIndex == toIndex)
             return null;
 
-        List<Order> subList = new ArrayList<>();
+        List<Order> subList = new ArrayList<>(); //todo тип TableOrderManager
         ListIterator<Order> iterator = listIterator(fromIndex);
 
         while(iterator.previousIndex() < toIndex)
@@ -339,6 +310,7 @@ public class TableOrdersManager implements List<Order>,OrdersManager {
         }
             return count;
     }
+    //todo это есть метод remove на строчке 102 - удали нафиг
     public int removeOrder(Order table){
         for(int i=0;i<size;i++) {
             if(tables[i].equals(table)) {

@@ -5,7 +5,7 @@ import java.time.LocalTime;
 import java.util.*;
 
 public  class InternetOrder implements Order{
-    private static Customer customer;
+    private Customer customer;
     private ListNode head;
     private ListNode tail;
     private int size;
@@ -18,9 +18,9 @@ public  class InternetOrder implements Order{
         dateTime = LocalDateTime.now();
     }
 
-    public InternetOrder(MenuItem[]items,Customer Customer)throws UnlawfulActionException{
+    public InternetOrder(MenuItem[]items,Customer customer)throws UnlawfulActionException{
         this();
-        customer = Customer;
+        this.customer = customer;
         for(int i = 0; items[i]!=null; i++) {
             if (items[i] instanceof Drink) {
                 Drink drink = (Drink) items[i];
@@ -29,7 +29,7 @@ public  class InternetOrder implements Order{
                         throw new UnlawfulActionException("Продажа алкоголя несовершеннолетним запрещена по закону!");
                     }
                 }
-                if (getDateTime().isAfter((LocalDateTime.of(getDateTime().toLocalDate(), LocalTime.of(22, 0))))) {
+                if (getDateTime().getHour() > 22 || getDateTime().getHour() < 6) {
                     throw new UnlawfulActionException("Продажа алкоголя после 22:00 запрещена по закону!");
                 }
             }
@@ -86,8 +86,6 @@ public  class InternetOrder implements Order{
     public void add(int index, MenuItem element) {
         if(index < 0 || index >= size)
             throw new IndexOutOfBoundsException();
-
-        ListIterator<MenuItem> listIterator = listIterator(index);
 
         ListNode node = getNode(index);
         ListNode newNode = new ListNode(element,null);
@@ -179,21 +177,22 @@ public  class InternetOrder implements Order{
 
         if(c.size() == 0)
             return false;
-
+        //todo логичнее ручками начиная с getNode(index) подобавлять новых нодов
         for (Object o : c) {
             add(index++, (MenuItem) o);
         }
         return true;
     }
 
+    //todo ты че твориш ваще!
     @Override
     public boolean removeAll(Collection<?> c) {
         Iterator<MenuItem> iterator = iterator();
         ListNode node = head;
         boolean changed = false;
+        //todo ручками по ноду и c.contains()
         while(iterator.hasNext()) {
             MenuItem item = iterator.next();
-
             for (int i = 0; i < size; i++) {
                 if (item.equals(node.item)) {
                     remove(i);
@@ -209,6 +208,8 @@ public  class InternetOrder implements Order{
     public boolean retainAll(Collection<?> c) {
         boolean changed = false;
         ListNode node = head;
+        //todo ручками по ноду и !c.contains()
+        //копипастерша!
         for(int i = 0; i < size; i++) {
             Iterator<?> iterator = c.iterator();
             boolean hasTravel = false;
@@ -248,10 +249,15 @@ public  class InternetOrder implements Order{
 
     @Override
     public void clear() {
-        ListNode node = head;
+        ListNode node = head, next;
+
         while(node.next!=null){
-            node=null;
-            node=node.next;
+            node.order=null;
+            node.prev = null;
+            next = node.next;
+            node.next = null;
+            //todo а как же value?
+            node=next;
         }
         size = 0;
     }
@@ -285,7 +291,8 @@ public  class InternetOrder implements Order{
             }
 
             public MenuItem next() {
-               MenuItem employee = node.item;
+                //todo NoSuchElementException (когда доходим до последнего элемента)
+                MenuItem employee = node.item;
                 node = node.next;
                 pos++;
                 return employee;
@@ -298,7 +305,7 @@ public  class InternetOrder implements Order{
         return items();
     }
 
-    public MenuItem[]items(){
+    MenuItem[]items(){
        MenuItem[]menuItems=new MenuItem[size];
        ListNode node = head;
       for(int i=0;i<size;i++){
@@ -439,6 +446,7 @@ public  class InternetOrder implements Order{
 
     @Override
     public MenuItem set(int index, MenuItem element) {
+        ListNode node = getNode(index); //todo use it
         MenuItem item = getNode(index).item;
         getNode(index).item = element;
 
@@ -486,6 +494,7 @@ public  class InternetOrder implements Order{
                 return size > pos;
             }
 
+            //todo NoSuchElementException (когда доходим до tail)
             public MenuItem next() {
                 MenuItem item = node.item;
                 node = node.next;
@@ -497,6 +506,7 @@ public  class InternetOrder implements Order{
                 return pos > 0;
             }
 
+            //todo NoSuchElementException (когда доходим до head)
             public MenuItem previous() {
                MenuItem item = node.item;
                 node = node.prev;
@@ -513,26 +523,26 @@ public  class InternetOrder implements Order{
             }
 
             public void remove() {
-                internetOrder.remove(pos);
+                internetOrder.remove(pos); //todo есть node используй его для удаления
             }
 
             public void set(MenuItem item) {
                 internetOrder.set(pos, item);
             }
 
-            public void add(MenuItem item) {internetOrder.add(item);
+            public void add(MenuItem item) {internetOrder.add(item); //todo добавление в текущую позицию а не конец
             }
         };
     }
 
     @Override
     public List<MenuItem> subList(int fromIndex, int toIndex) {
-            if(fromIndex < 0 || toIndex > size || fromIndex > toIndex)
+            if(fromIndex < 0 || toIndex > size )
                 throw new IndexOutOfBoundsException();
-            if(fromIndex == toIndex)
-                return null;
+            if(fromIndex > toIndex)
+                throw new IllegalArgumentException();
 
-            List<MenuItem> subList = new ArrayList<>();
+            List<MenuItem> subList = new ArrayList<>(); //todo должен быть InternetOrder
             ListIterator<MenuItem> iterator = listIterator(fromIndex);
 
             while(iterator.previousIndex() < toIndex)
@@ -546,7 +556,7 @@ public  class InternetOrder implements Order{
         return customer;
     }  //new
     public void setCustomer(Customer customer) {
-        InternetOrder.customer = customer;
+        this.customer = customer;
     }
 
     public LocalDateTime getDateTime() {
