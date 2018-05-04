@@ -4,7 +4,7 @@ import com.sun.org.apache.xpath.internal.operations.Or;
 
 import java.time.LocalDate;
 import java.util.*;
-//todo все методы добавления объектов в очередь должны проверять совпадения и либо выбрасывать AlreadyAddedException, либо возвращать false
+//todo * все методы добавления объектов в очередь должны проверять совпадения и либо выбрасывать AlreadyAddedException, либо возвращать false
 public class InternetOrdersManager implements Deque<Order>,OrdersManager{
 
     private ListNode head;
@@ -69,27 +69,25 @@ public class InternetOrdersManager implements Deque<Order>,OrdersManager{
         return ordersByCustomer;
     }
 
-    //todo какая-то хуйня
+    //todo * какая-то хуйня
     public boolean add(InternetOrder order) throws AlreadyAddedException {
-        ListNode node = new ListNode();
-        node = head;
-        ListNode newNode = new ListNode(order,null);
+        ListNode node = head;
+        ListNode newNode=new ListNode(order,null);
         while(node!=null) {
             if (head == null) {
-                head = newNode;
+                head.order=order;
                 size++;
             } else {
-                if (node.order.getCustomer().equals(newNode.order.getCustomer()) & node.order.getDateTime().isEqual(newNode.order.getDateTime())) {
-                    throw new AlreadyAddedException("&#x41d;&#x435;&#x432;&#x43e;&#x437;&#x43c;&#x43e;&#x436;&#x43d;&#x43e; &#x43f;&#x43e;&#x432;&#x442;&#x43e;&#x440;&#x43d;&#x43e; &#x434;&#x43e;&#x431;&#x430;&#x432;&#x438;&#x442;&#x44c; &#x437;&#x430;&#x43a;&#x430;&#x437;");
+                if (node.order.equals(order)) {
+                    throw new AlreadyAddedException();
                 }
-
-
-                tail = node;
-                tail.next = tail;
-                size++;
             }
             node = node.next;
         }
+        tail.next = newNode;
+        newNode.prev=tail;
+        tail=newNode;
+        size++;
         return true;
     }
 
@@ -114,7 +112,6 @@ public class InternetOrdersManager implements Deque<Order>,OrdersManager{
 
     @Override
     public void addFirst(Order order) {
-        if(order==null)throw new NullPointerException();
         ListNode oldHead = head;
         head=new ListNode();
         head.order=order;
@@ -122,6 +119,7 @@ public class InternetOrdersManager implements Deque<Order>,OrdersManager{
         if(isEmpty()){
             tail=head;
         }else{
+
             head.next=oldHead;
         }
         size++;
@@ -134,6 +132,7 @@ public class InternetOrdersManager implements Deque<Order>,OrdersManager{
         tail=new ListNode();
         tail.order=order;
         tail.next=null;
+        if(contains(order))throw new AlreadyAddedException();
         if(isEmpty()){
             head=tail;
         }else{
@@ -301,6 +300,7 @@ public class InternetOrdersManager implements Deque<Order>,OrdersManager{
             return true;
         }
         else {
+            if(node.order.equals(order))throw new AlreadyAddedException();
             tail.next = node;
             tail = node;
             size++;
@@ -399,17 +399,13 @@ public class InternetOrdersManager implements Deque<Order>,OrdersManager{
 
     @Override
     public boolean removeAll(Collection<?> c) {
-        //todo refactor same as in InternetOrder
+        //todo * refactor same as in InternetOrder
         ListNode node = head;
         boolean changed = false;
-        for (Object o :c) {
-
-            for (int i = 0; i < size; i++) {
-                if(node.order.equals(o)) {
-                    remove(i);
-                    changed = true;
-                    break;
-                }
+        while(node!=null){
+            if(c.contains(node)){
+                remove(node);
+                changed=true;
             }
             node=node.next;
         }
@@ -418,32 +414,28 @@ public class InternetOrdersManager implements Deque<Order>,OrdersManager{
 
     @Override
     public boolean retainAll(Collection<?> c) {
-        //todo refactor same as in InternetOrder
-        boolean changed = false;
+        //todo * refactor same as in InternetOrder
         ListNode node = head;
-        for(int i = 0; i < size; i++) {
-            Iterator<?> iterator = c.iterator();
-            boolean hasItem = false;
-            while (iterator.hasNext()) {
-                if (node.item.equals(iterator.next())) {
-                    hasItem = true;
-                    break;
-                }
+        boolean changed = false;
+        while(node!=null){
+            if(!c.contains(node)){
+                remove(node);
+                changed=true;
             }
-            if (!hasItem) {
-                remove(i);
-                changed = true;
-            }
-            node = node.next;
+            node=node.next;
         }
         return changed;
     }
 
     @Override
     public void clear() {
-        //todo очищаем очередь ручками - делаем null все ссылки на нодах
-        head = null;
-        tail = null;
+        //todo * очищаем очередь ручками - делаем null все ссылки на нодах
+        ListNode node = head;
+        while(node.next!=null){
+            node.order=null;
+            node.prev=null;
+            node.next=null;
+        }
         size = 0;
     }
 
@@ -478,6 +470,7 @@ public class InternetOrdersManager implements Deque<Order>,OrdersManager{
 
             //todo NoSuchElementException
             public Order next() {
+                if(node==null)throw new NoSuchElementException();
                 Order order = node.order;
                 node = node.next;
                 pos++;
@@ -508,6 +501,7 @@ public class InternetOrdersManager implements Deque<Order>,OrdersManager{
 
             //todo NoSuchElementException
             public Order next() {
+                if(node==null)throw new NoSuchElementException();
                 Order order = node.order;
                 node = node.prev;
                 pos--;

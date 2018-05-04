@@ -177,53 +177,43 @@ public  class InternetOrder implements Order{
 
         if(c.size() == 0)
             return false;
-        //todo логичнее ручками начиная с getNode(index) подобавлять новых нодов
-        for (Object o : c) {
-            add(index++, (MenuItem) o);
+        //todo * логичнее ручками начиная с getNode(index) подобавлять новых нодов
+        ListNode node = getNode(index);
+        for(Object o:c){
+            if(node==null)break;
+            node.item=(MenuItem)o;
+            node=node.next;
         }
         return true;
     }
 
-    //todo ты че твориш ваще!
+    //todo * ты че твориш ваще!
     @Override
     public boolean removeAll(Collection<?> c) {
-        Iterator<MenuItem> iterator = iterator();
         ListNode node = head;
         boolean changed = false;
-        //todo ручками по ноду и c.contains()
-        while(iterator.hasNext()) {
-            MenuItem item = iterator.next();
-            for (int i = 0; i < size; i++) {
-                if (item.equals(node.item)) {
-                    remove(i);
-                    changed = true;
-                    break;
-                }
+        //todo * ручками по ноду и c.contains()
+        while(node!=null){
+            if(c.contains(node)){
+                remove(node);
+                changed=true;
             }
+            node=node.next;
         }
         return changed;
     }
 
     @Override
     public boolean retainAll(Collection<?> c) {
-        boolean changed = false;
         ListNode node = head;
-        //todo ручками по ноду и !c.contains()
-        //копипастерша!
-        for(int i = 0; i < size; i++) {
-            Iterator<?> iterator = c.iterator();
-            boolean hasTravel = false;
-            while (iterator.hasNext()) {
-                if (node.item.equals(iterator.next())) {
-                    hasTravel = true;
-                    break;
-                }
+        boolean changed = false;
+        //todo * ручками по ноду и c.contains()
+        while(node!=null){
+            if(!c.contains(node)){
+                remove(node);
+                changed=true;
             }
-            if (!hasTravel) {
-                remove(i);
-                changed = true;
-            }
-            node = node.next;
+            node=node.next;
         }
         return changed;
     }
@@ -252,11 +242,11 @@ public  class InternetOrder implements Order{
         ListNode node = head, next;
 
         while(node.next!=null){
-            node.order=null;
-            node.prev = null;
             next = node.next;
+            node.prev = null;
             node.next = null;
-            //todo а как же value?
+            node.item=null;
+            //todo * а как же value?
             node=next;
         }
         size = 0;
@@ -291,7 +281,8 @@ public  class InternetOrder implements Order{
             }
 
             public MenuItem next() {
-                //todo NoSuchElementException (когда доходим до последнего элемента)
+                //todo * NoSuchElementException (когда доходим до последнего элемента)
+                if(node==null)throw new NoSuchElementException();
                 MenuItem employee = node.item;
                 node = node.next;
                 pos++;
@@ -446,11 +437,11 @@ public  class InternetOrder implements Order{
 
     @Override
     public MenuItem set(int index, MenuItem element) {
-        ListNode node = getNode(index); //todo use it
-        MenuItem item = getNode(index).item;
-        getNode(index).item = element;
+        ListNode node = getNode(index); //todo * use it
+        MenuItem old = node.item;
+        node.item = element;
 
-        return item;
+        return old;
     }
 
     @Override
@@ -486,6 +477,7 @@ public  class InternetOrder implements Order{
             throw new IndexOutOfBoundsException();
 
         InternetOrder internetOrder = this;
+
         return new ListIterator<MenuItem>() {
             ListNode node = getNode(index);
             int pos = index;
@@ -494,8 +486,9 @@ public  class InternetOrder implements Order{
                 return size > pos;
             }
 
-            //todo NoSuchElementException (когда доходим до tail)
+            //todo * NoSuchElementException (когда доходим до tail)
             public MenuItem next() {
+                if(node==tail)throw new NoSuchElementException();
                 MenuItem item = node.item;
                 node = node.next;
                 pos++;
@@ -506,9 +499,10 @@ public  class InternetOrder implements Order{
                 return pos > 0;
             }
 
-            //todo NoSuchElementException (когда доходим до head)
+            //todo * NoSuchElementException (когда доходим до head)
             public MenuItem previous() {
-               MenuItem item = node.item;
+                if(node==head)throw new NoSuchElementException();
+                MenuItem item = node.item;
                 node = node.prev;
                 pos--;
                 return item;
@@ -523,14 +517,15 @@ public  class InternetOrder implements Order{
             }
 
             public void remove() {
-                internetOrder.remove(pos); //todo есть node используй его для удаления
+                internetOrder.remove(node.prev); //todo *? есть node используй его для удаления
             }
 
             public void set(MenuItem item) {
                 internetOrder.set(pos, item);
             }
 
-            public void add(MenuItem item) {internetOrder.add(item); //todo добавление в текущую позицию а не конец
+            public void add(MenuItem item) {//todo * добавление в текущую позицию а не конец
+                internetOrder.add(index,item);
             }
         };
     }
@@ -542,7 +537,7 @@ public  class InternetOrder implements Order{
             if(fromIndex > toIndex)
                 throw new IllegalArgumentException();
 
-            List<MenuItem> subList = new ArrayList<>(); //todo должен быть InternetOrder
+            InternetOrder subList = new InternetOrder(); //todo * должен быть InternetOrder
             ListIterator<MenuItem> iterator = listIterator(fromIndex);
 
             while(iterator.previousIndex() < toIndex)

@@ -18,25 +18,18 @@ public class TableOrdersManager implements List<Order>,OrdersManager {
         tables = new TableOrder[length];
         size= DEFAULT_SIZE;
     }
-    //todo код этого метода должен быть на строчке 203
-    public void add(int num, TableOrder NewOrder)throws AlreadyAddedException {
-        if(!isFreeTable(num)){
-            throw new AlreadyAddedException("Столик не свободен");
-        }
-        tables[num] = NewOrder;
-        size++;
-    }
+    //todo * код этого метода должен быть на строчке 203
     public Order ReturnOrder(int num){
         return tables[num];
     }
 
-    //todo откуда берутся эти num?
-    public void AddItem(int num, MenuItem item) throws UnlawfulActionException{
+    //todo * откуда берутся эти num?
+    public void addItem(int num, MenuItem item) throws UnlawfulActionException{
         if(item instanceof Drink){
             Drink drink = (Drink)item;
             if(drink.isItAlcoholic()
                     & tables[num].getCustomer().getAge()<18
-                    & tables[num].getDateTime().isAfter((LocalDateTime.of(tables[num].getDateTime().toLocalDate(), LocalTime.of(22, 0))))) {
+                    & tables[num].getDateTime().getHour()>22 || tables[num].getDateTime().getHour()<6) {
                 throw new UnlawfulActionException();
             }
         }
