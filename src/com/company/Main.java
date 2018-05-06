@@ -31,10 +31,7 @@ public class Main {
         Order order1 = new InternetOrder();
         order1.add(item1);
         order1.add(item1);
-        InternetOrdersManager internetOrdersManager = new InternetOrdersManager();
-        internetOrdersManager.add(order);
-        internetOrdersManager.add(order1);
-            System.out.println(internetOrdersManager.toString());
+
     }
     public static void print(MenuItem[] items){
         for(int i=0;i<items.length;i++){

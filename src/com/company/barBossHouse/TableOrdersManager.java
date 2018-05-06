@@ -69,9 +69,10 @@ public class TableOrdersManager implements List<Order>,OrdersManager {
             }
 
             public Order next() {
+                if(pos==size-1)throw new NoSuchElementException();
                 return tables[pos++];
             }
-            //todo NoSuchElementException (когда доходим до последнего элемента)
+            //todo * NoSuchElementException (когда доходим до последнего элемента)
 
         };
     }
@@ -123,27 +124,22 @@ public class TableOrdersManager implements List<Order>,OrdersManager {
             throw new IndexOutOfBoundsException();
 
         for (Object o : c) {
-            tables[index++] = (Order) o;
-            //todo AlreadyAddedException
-            //todo идешь либо до первого эксепшена, либо до конца c, либо до конца this.orders
+            if(contains(o))throw new AlreadyAddedException();
+            tables[index++]=(Order)o;
         }
-        //size += c.size();
+            //todo * AlreadyAddedException
+            //todo *? идешь либо до первого эксепшена, либо до конца c, либо до конца this.orders
         return true;
     }
 
     @Override
     public boolean removeAll(Collection<?> c) {
-        Iterator<Order> iterator = iterator();
+        //todo * отрефакторить аналогично order
         boolean changed = false;
-        //todo отрефакторить аналогично order
-        while(iterator.hasNext()) {
-            Order order = iterator.next();
-            for (int i = 0; i < size; i++) {
-                if (order.equals(tables[i])) {
-                    remove(i);
-                    changed = true;
-                    break;
-                }
+        for (Object o: c) {
+            if(contains(o)){
+                remove(o);
+                changed = true;
             }
         }
         return changed;
@@ -151,19 +147,11 @@ public class TableOrdersManager implements List<Order>,OrdersManager {
 
     @Override
     public boolean retainAll(Collection<?> c) {
-        //todo отрефакторить аналогично order
+        //todo * отрефакторить аналогично order
         boolean changed = false;
-        for(int i = 0; i < size; i++) {
-            Iterator<?> iterator = c.iterator();
-            boolean hasItem = false;
-            while (iterator.hasNext()) {
-                if (tables[i].equals(iterator.next())) {
-                    hasItem = true;
-                    break;
-                }
-            }
-            if (!hasItem) {
-                remove(i);
+        for (Order o: tables) {
+            if(!c.contains(o)){
+                remove(o);
                 changed = true;
             }
         }
@@ -172,8 +160,10 @@ public class TableOrdersManager implements List<Order>,OrdersManager {
 
     @Override
     public void clear() {
-        tables = new Order[tables.length];
-        //todo ручками по массиву и null
+        //todo * ручками по массиву и null
+        for(int i=0;i<tables.length;i++){
+            tables[i]=null;
+        }
         size = 0;
     }
 
@@ -234,48 +224,87 @@ public class TableOrdersManager implements List<Order>,OrdersManager {
 
     @Override
     public ListIterator<Order> listIterator(int index) {
-        //todo аналогично итератору из TableOrder
+        //todo * аналогично итератору из TableOrder
         if(index < 0 || index > size)
             throw new IndexOutOfBoundsException();
 
         TableOrdersManager tableOrdersManager = this;
         return new ListIterator<Order>() {
-            int i = index;
+            int pos = index;
+            int elementPos = 0;
+            ListIteratorOperation lastOperation = ListIteratorOperation.NONE;
+            private void illegalState(){
+                switch (lastOperation){
+                    case NONE:
+                        throw new IllegalStateException("Не были вызваны методы \"next()\" или \"previous()\"");
+                    case ADD:
+                        throw new IllegalStateException("Последний вызов: \"add()\"");
+                    case REMOVE:
+                        throw new IllegalStateException("Последний вызов: \"remove()\"");
+                }
+            }
 
             public boolean hasNext() {
-                return tables.length > i;
+                return size-1 > pos;
             }
 
             public Order next() {
-                return tables[i++];
+                switch (lastOperation) {
+                    case ADD:
+                        lastOperation = ListIteratorOperation.NEXT;
+                        return tables[pos];
+                    default:
+                        lastOperation = ListIteratorOperation.NEXT;
+                        return tables[(pos + 1 > size - 1)?(size - 1):pos++];
+                }
             }
 
             public boolean hasPrevious() {
-                return i > 0;
+                return pos > 0;
             }
 
             public Order previous() {
-                return tables[i--];
+                switch (lastOperation) {
+                    case ADD:
+                        lastOperation = ListIteratorOperation.PREVIOUS;
+                        pos = elementPos;
+                        return tables[pos];
+                    default:
+                        lastOperation = ListIteratorOperation.PREVIOUS;
+                        return tables[(pos - 1 < 0)?0:pos--];
+                }
             }
 
             public int nextIndex() {
-                return i + 1;
+                return pos + 1;
             }
 
             public int previousIndex() {
-                return i - 1;
+                return pos - 1;
             }
 
             public void remove() {
-                tableOrdersManager.remove(i);
+                switch (lastOperation) {
+                    case NEXT:
+                        tableOrdersManager.remove(--pos);
+                        break;
+                    case PREVIOUS:
+                        tableOrdersManager.remove(pos + 1);
+                        break;
+                    default:
+                        illegalState();
+                }
+                lastOperation = ListIteratorOperation.REMOVE;
             }
 
-            public void set(Order order) {
-                tableOrdersManager.set(i, order);
+            @Override
+            public void set(Order menuItems) {
+
             }
 
-            public void add(Order order) {
-                tableOrdersManager.add(i, order);
+            @Override
+            public void add(Order menuItems) {
+
             }
         };
     }
@@ -287,7 +316,7 @@ public class TableOrdersManager implements List<Order>,OrdersManager {
         if(fromIndex == toIndex)
             return null;
 
-        List<Order> subList = new ArrayList<>(); //todo тип TableOrderManager
+       TableOrdersManager subList = new TableOrdersManager(toIndex - fromIndex); //todo * тип TableOrderManager
         ListIterator<Order> iterator = listIterator(fromIndex);
 
         while(iterator.previousIndex() < toIndex)
@@ -303,17 +332,7 @@ public class TableOrdersManager implements List<Order>,OrdersManager {
         }
             return count;
     }
-    //todo это есть метод remove на строчке 102 - удали нафиг
-    public int removeOrder(Order table){
-        for(int i=0;i<size;i++) {
-            if(tables[i].equals(table)) {
-                System.arraycopy(tables,i+1,tables,i,size-i-1 );
-                size--;
-                return i;
-            }
-        }
-        return -1;
-    }
+    //todo * это есть метод remove на строчке 102 - удали нафиг
     public int removeAllOrders(Order table){
         int count=0;
         for(int i=0;i<size;i++) {
