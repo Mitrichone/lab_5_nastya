@@ -1,5 +1,4 @@
 package com.company.barBossHouse;
-
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.*;
@@ -37,6 +36,13 @@ public  class InternetOrder implements Order{
         }
 
     }
+
+    public String getType(int index){
+        ListNode node = this.getNode(index);
+        if(node.item instanceof Drink)return "drink";
+        if(node.item instanceof Dish)return "dish";
+        throw new NoSuchElementException();
+    }
     @Override
     public boolean add(MenuItem item){
 
@@ -66,6 +72,7 @@ public  class InternetOrder implements Order{
         }
         return false;
     }
+
     private ListNode getNode(int index){
         ListNode node;
         if(index <= size / 2) {
@@ -107,18 +114,18 @@ public  class InternetOrder implements Order{
             throw new IndexOutOfBoundsException();
         }
         while(node.next != null) {
-         if(count==index){
-             MenuItem item = node.item;
-             if(tail == node.next)
-             {
-                 tail = node;
-             }
-             node.next = node.next.next;
-             size--;
-             return item;
-         }
-         node = node.next;
-         count++;
+            if(count==index){
+                MenuItem item = node.item;
+                if(tail == node.next)
+                {
+                    tail = node;
+                }
+                node.next = node.next.next;
+                size--;
+                return item;
+            }
+            node = node.next;
+            count++;
         }
         return null;
     }
@@ -177,7 +184,7 @@ public  class InternetOrder implements Order{
 
         if(c.size() == 0)
             return false;
-        //todo * логичнее ручками начиная с getNode(index) подобавлять новых нодов
+
         ListNode node = getNode(index);
         for(Object o:c){
             if(node==null)break;
@@ -187,12 +194,11 @@ public  class InternetOrder implements Order{
         return true;
     }
 
-    //todo * ты че твориш ваще!
+
     @Override
     public boolean removeAll(Collection<?> c) {
         ListNode node = head;
         boolean changed = false;
-        //todo * ручками по ноду и c.contains()
         while(node!=null){
             if(c.contains(node)){
                 remove(node);
@@ -207,7 +213,6 @@ public  class InternetOrder implements Order{
     public boolean retainAll(Collection<?> c) {
         ListNode node = head;
         boolean changed = false;
-        //todo * ручками по ноду и c.contains()
         while(node!=null){
             if(!c.contains(node)){
                 remove(node);
@@ -229,7 +234,7 @@ public  class InternetOrder implements Order{
                 }
                 node.next = node.next.next;
                 size--;
-               count++;
+                count++;
             }
             node = node.next;
         }
@@ -246,15 +251,14 @@ public  class InternetOrder implements Order{
             node.prev = null;
             node.next = null;
             node.item=null;
-            //todo * а как же value?
             node=next;
         }
         size = 0;
     }
 
-   public int size(){
+    public int size(){
         return size;
-   }
+    }
 
     @Override
     public boolean isEmpty() {
@@ -281,7 +285,6 @@ public  class InternetOrder implements Order{
             }
 
             public MenuItem next() {
-                //todo * NoSuchElementException (когда доходим до последнего элемента)
                 if(node==null)throw new NoSuchElementException();
                 MenuItem employee = node.item;
                 node = node.next;
@@ -297,14 +300,14 @@ public  class InternetOrder implements Order{
     }
 
     MenuItem[]items(){
-       MenuItem[]menuItems=new MenuItem[size];
-       ListNode node = head;
-      for(int i=0;i<size;i++){
-           menuItems[i]=node.item;
-           node = node.next;
-       }
-       return menuItems;
-   }
+        MenuItem[]menuItems=new MenuItem[size];
+        ListNode node = head;
+        for(int i=0;i<size;i++){
+            menuItems[i]=node.item;
+            node = node.next;
+        }
+        return menuItems;
+    }
 
     @Override
     public <T> T[] toArray(T[] a) {
@@ -312,27 +315,27 @@ public  class InternetOrder implements Order{
     }
 
     public int TotalCost(){
-       int cost=0;
-       ListNode node = head;
+        int cost=0;
+        ListNode node = head;
         for(int i=0;i<size;i++){
             cost+=node.item.getCost();
             node = node.next;
         }
-       return cost;
-   }
+        return cost;
+    }
 
-   @Override
+    @Override
     public int numOfItems(String itemName){
-       int count = 0;
-       ListNode node = head;
-       for(int i=0;i<size;i++){
-           if(node.item.getName().equals(itemName))count++;
-           node = node.next;
-       }
-       return count;
-   }
-   @Override
-   public int numOfItems(MenuItem item){
+        int count = 0;
+        ListNode node = head;
+        for(int i=0;i<size;i++){
+            if(node.item.getName().equals(itemName))count++;
+            node = node.next;
+        }
+        return count;
+    }
+    @Override
+    public int numOfItems(MenuItem item){
         int count = 0;
         ListNode node = head;
         for(int i=0;i<size;i++){
@@ -348,41 +351,41 @@ public  class InternetOrder implements Order{
     }
 
     public String[] itemNames() {
-    int dishesNamesSize = 0;
-    int count = 0;
-    ListNode node1 = head;
-    ListNode node2 = head;
-    for (int i = 0; i < size; i++) {
-        for (int j = i + 1; j < size; j++) { //если элемент после i не равен ему, считаем сколько таких
-            if (!node1.item.getName().equals(node2.item.getName())) {
-                count++;
+        int dishesNamesSize = 0;
+        int count = 0;
+        ListNode node1 = head;
+        ListNode node2 = head;
+        for (int i = 0; i < size; i++) {
+            for (int j = i + 1; j < size; j++) { //если элемент после i не равен ему, считаем сколько таких
+                if (!node1.item.getName().equals(node2.item.getName())) {
+                    count++;
+                }
+                node2=node2.next;
             }
-            node2=node2.next;
+            if (count == size - i)
+                dishesNamesSize++; //если это количество = общему числу до конца массива, то i не повторяется
+            node1 = node1.next;
         }
-        if (count == size - i)
-            dishesNamesSize++; //если это количество = общему числу до конца массива, то i не повторяется
-        node1 = node1.next;
-    }
-    String[] dishesNames = new String[dishesNamesSize];
-    count = 0;
-    int index = 0;
-    node1 = head;
-    node2 = head;
-    for (int i = 0; i < size; i++) {
-        for (int j = i + 1; j < size; j++) {
-            if (!node1.item.getName().equals(node2.item.getName())) {
-                count++;
+        String[] dishesNames = new String[dishesNamesSize];
+        count = 0;
+        int index = 0;
+        node1 = head;
+        node2 = head;
+        for (int i = 0; i < size; i++) {
+            for (int j = i + 1; j < size; j++) {
+                if (!node1.item.getName().equals(node2.item.getName())) {
+                    count++;
+                }
+                node2=node2.next;
             }
-            node2=node2.next;
+            if (count == size - i) { //если элемент не повторяется
+                dishesNames[index] = node1.item.getName();
+                index++;
+            }
+            node1 = node1.next;
         }
-        if (count == size - i) { //если элемент не повторяется
-            dishesNames[index] = node1.item.getName();
-            index++;
-        }
-        node1 = node1.next;
+        return dishesNames;
     }
-    return dishesNames;
-}
     public MenuItem[] sort(){
         MenuItem[]items = items();
         Arrays.sort(items,MenuItem::compareTo);
@@ -391,29 +394,29 @@ public  class InternetOrder implements Order{
 
     public String toString() {
         ListNode node = head;
-      StringBuilder stringBuilder = new StringBuilder("InternetOrder: ")
-              .append('\n')
-              .append(size)
-              .append('\n');
-    while(node.next!=null) {
-        stringBuilder.append(node.item.toString()).append ('\n');
-        node = node.next;
-    }
-           return String.valueOf(stringBuilder);
+        StringBuilder stringBuilder = new StringBuilder("InternetOrder: ")
+                .append('\n')
+                .append(size)
+                .append('\n');
+        while(node.next!=null) {
+            stringBuilder.append(node.item.toString()).append ('\n');
+            node = node.next;
+        }
+        return String.valueOf(stringBuilder);
     }
 
     public boolean equals(Object obj) {
-       if(obj.getClass().equals(this.getClass())) {
-           InternetOrder internetOrder = (InternetOrder) obj;
-           if (internetOrder.getCustomer().equals(customer) && internetOrder.size == size && internetOrder.dateTime.isEqual(getDateTime())) {
-               InternetOrder order = (InternetOrder) obj;
+        if(obj.getClass().equals(this.getClass())) {
+            InternetOrder internetOrder = (InternetOrder) obj;
+            if (internetOrder.getCustomer().equals(customer) && internetOrder.size == size && internetOrder.dateTime.isEqual(getDateTime())) {
+                InternetOrder order = (InternetOrder) obj;
 
-               if(this.size != order.size)
-                   return false;
+                if(this.size != order.size)
+                    return false;
 
-               return (customer.equals(order.getCustomer()) &&  this.hashCode() == obj.hashCode());
-           }
-       }
+                return (customer.equals(order.getCustomer()) &&  this.hashCode() == obj.hashCode());
+            }
+        }
         return false;
     }
 
@@ -437,7 +440,7 @@ public  class InternetOrder implements Order{
 
     @Override
     public MenuItem set(int index, MenuItem element) {
-        ListNode node = getNode(index); //todo * use it
+        ListNode node = getNode(index);
         MenuItem old = node.item;
         node.item = element;
 
@@ -485,8 +488,6 @@ public  class InternetOrder implements Order{
             public boolean hasNext() {
                 return size > pos;
             }
-
-            //todo * NoSuchElementException (когда доходим до tail)
             public MenuItem next() {
                 if(node==tail)throw new NoSuchElementException();
                 MenuItem item = node.item;
@@ -498,8 +499,6 @@ public  class InternetOrder implements Order{
             public boolean hasPrevious() {
                 return pos > 0;
             }
-
-            //todo * NoSuchElementException (когда доходим до head)
             public MenuItem previous() {
                 if(node==head)throw new NoSuchElementException();
                 MenuItem item = node.item;
@@ -517,14 +516,14 @@ public  class InternetOrder implements Order{
             }
 
             public void remove() {
-                internetOrder.remove(node.prev); //todo *? есть node используй его для удаления
+                internetOrder.remove(node.prev);
             }
 
             public void set(MenuItem item) {
                 internetOrder.set(pos, item);
             }
 
-            public void add(MenuItem item) {//todo * добавление в текущую позицию а не конец
+            public void add(MenuItem item) {
                 internetOrder.add(index,item);
             }
         };
@@ -532,18 +531,18 @@ public  class InternetOrder implements Order{
 
     @Override
     public List<MenuItem> subList(int fromIndex, int toIndex) {
-            if(fromIndex < 0 || toIndex > size )
-                throw new IndexOutOfBoundsException();
-            if(fromIndex > toIndex)
-                throw new IllegalArgumentException();
+        if(fromIndex < 0 || toIndex > size )
+            throw new IndexOutOfBoundsException();
+        if(fromIndex > toIndex)
+            throw new IllegalArgumentException();
 
-            InternetOrder subList = new InternetOrder(); //todo * должен быть InternetOrder
-            ListIterator<MenuItem> iterator = listIterator(fromIndex);
+        InternetOrder subList = new InternetOrder();
+        ListIterator<MenuItem> iterator = listIterator(fromIndex);
 
-            while(iterator.previousIndex() < toIndex)
-                subList.add(iterator.next());
+        while(iterator.previousIndex() < toIndex)
+            subList.add(iterator.next());
 
-            return subList;
+        return subList;
 
     }
 

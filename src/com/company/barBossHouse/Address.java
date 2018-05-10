@@ -60,41 +60,45 @@ public final class Address {
         return zipCode;
     }
 
-    public int getHouse_number() {
+    public int getBuildingNumber() {
         return buildingNumber;
     }
 
-    public char getLiteral() {
+    public char getBuildingLetter() {
         return buildingLetter;
     }
 
-    public int getOffice_number() {
+    public int getApartmentNumber() {
         return apartmentNumber;
     }
     //endregion
 
     public String toString() {
         StringBuilder toString = new StringBuilder("Address: ");
-        if (!city.equals(DEFAULT_STRING)) {
+        if (!city.equals(DEFAULT_STRING)) { //string int, string int char - int
             toString.append(city);
         }
+        toString.append(" ");
         if (zipCode !=DEFAULT_INT)
         {
-            toString.append(zipCode).append(", ");
+            toString.append(zipCode);
         }
+        toString.append(", ");
         if (!street.equals(DEFAULT_STRING)){
-            toString.append(street).append(" ");
+            toString.append(street);
         }
+        toString.append(" ");
         if (buildingNumber!=DEFAULT_INT) {
             toString.append(buildingNumber);
         }
         if (!(buildingLetter == DEFAULT_CHAR)){
             toString.append(buildingLetter);
         }
+        toString.append("-");
         if (apartmentNumber!=DEFAULT_INT) {
-            toString.append("-").append(apartmentNumber);
+            toString.append(apartmentNumber);
         }
-        return toString.toString() ;
+        return toString.toString();
     }
 
     public boolean equals(Object obj) {

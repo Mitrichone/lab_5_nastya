@@ -13,15 +13,15 @@ public class TableOrder implements Order{
     private int size;
     private Customer customer;
     private LocalDateTime dateTime;
-     //region Конструкторы
+    //region Конструкторы
     public TableOrder(){
         items = new MenuItem[DEFAULT_LENGTH];
         size=0;
         dateTime = LocalDateTime.now();
     }
-    public TableOrder(int num, Customer customer)throws NegativeSizeException {
-        if(num<0)
-            throw new NegativeSizeException("Размер массива не может быть отрицательным");
+    public TableOrder(int num, Customer customer){//throws NegativeSizeException {
+        //if(num<0)
+         //   throw new NegativeSizeException("Размер массива не может быть отрицательным");
         items = new MenuItem[num];
         size = 0;
         this.customer = customer;
@@ -41,9 +41,9 @@ public class TableOrder implements Order{
     }
     //endregion
 
-     // region Все get и set
+    // region Все get и set
     public MenuItem get(int i){
-         if(i<0 || i==size())throw new IndexOutOfBoundsException();
+        if(i<0 || i==size())throw new IndexOutOfBoundsException();
         return items[i];
     }
     public MenuItem set(int index, MenuItem element) {
@@ -75,7 +75,7 @@ public class TableOrder implements Order{
     }
     //endregion
 
-     //region все аdd
+    //region все аdd
     public void add(int index, MenuItem element) {
         if(element == null)throw new NullPointerException();
         if(index < 0 || index >= size - 1)
@@ -128,7 +128,7 @@ public class TableOrder implements Order{
             throw new IndexOutOfBoundsException();
 
         if(size + c.size() > items.length){
-           MenuItem[] newItems = new MenuItem[size+c.size()];
+            MenuItem[] newItems = new MenuItem[size+c.size()];
             System.arraycopy(items, 0, newItems, 0, items.length);
             items = newItems;
         }
@@ -153,7 +153,7 @@ public class TableOrder implements Order{
 
     //endregion
 
-     //region remove
+    //region remove
     public boolean remove(Object o) {
         for (int i = 0; i < size; i++) {
             if (Objects.equals(items[i], o)) {
@@ -175,10 +175,10 @@ public class TableOrder implements Order{
         return false;
     }
     public MenuItem remove(int index) {
-       if(index<0 || index>=size){
-           throw new IndexOutOfBoundsException();
-       }
-       MenuItem previous = items[index];
+        if(index<0 || index>=size){
+            throw new IndexOutOfBoundsException();
+        }
+        MenuItem previous = items[index];
         arraycopy(items, index+1, items, index, size-index-1);
         size--;
         return previous;
@@ -195,7 +195,7 @@ public class TableOrder implements Order{
     }
     //endregion
 
-     //region contain
+    //region contain
     @Override
     public boolean contains(Object o) {
         for (MenuItem item: items) {
@@ -212,6 +212,12 @@ public class TableOrder implements Order{
         return true;
     }
     //endregion
+
+    public String getType(int index){
+        if(items[index]instanceof Drink)return "drink";
+        if(items[index]instanceof Dish)return "dish";
+        throw new NoSuchElementException();
+    }
     public boolean retainAll(Collection<?> c) {
         boolean changed = false;
         for (MenuItem o: items) {
@@ -493,36 +499,36 @@ public class TableOrder implements Order{
             }
         }
         return false;
-}
+    }
 
-  public String toString() {
+    public String toString() {
 
-    StringBuilder s = new StringBuilder("");
-    s.append("TableOrder: ");
-    s.append(size);
-    s.append('\n');
-    for(int i=0;i<size;i++)
-        s.append(items[i].toString()).append(" ");
+        StringBuilder s = new StringBuilder("");
+        s.append("TableOrder: ");
+        s.append(size);
         s.append('\n');
-   return String.valueOf(s);
-  }
-  public boolean equals(Object obj) {
-      int count = 0;
-      if(obj.getClass().equals(this.getClass())) {
-          TableOrder tableOrder = (TableOrder) obj;
-          if (tableOrder.getCustomer().equals(customer) && tableOrder.size == size && tableOrder.dateTime.isEqual(getDateTime())) {
-              TableOrder order = (TableOrder) obj;
-              return (customer.equals(order.getCustomer()) &&  this.hashCode() == obj.hashCode());
-          }
-      }
-      return false;
-  }
-  public int hashCode(){
-      int hash=size^customer.hashCode();
-      for(int i=0;i<size;i++){
-          hash^=items[i].hashCode();
-      }
-      return hash;
+        for(int i=0;i<size;i++)
+            s.append(items[i].toString()).append(" ");
+        s.append('\n');
+        return String.valueOf(s);
+    }
+    public boolean equals(Object obj) {
+        int count = 0;
+        if(obj.getClass().equals(this.getClass())) {
+            TableOrder tableOrder = (TableOrder) obj;
+            if (tableOrder.getCustomer().equals(customer) && tableOrder.size == size && tableOrder.dateTime.isEqual(getDateTime())) {
+                TableOrder order = (TableOrder) obj;
+                return (customer.equals(order.getCustomer()) &&  this.hashCode() == obj.hashCode());
+            }
+        }
+        return false;
+    }
+    public int hashCode(){
+        int hash=size^customer.hashCode();
+        for(int i=0;i<size;i++){
+            hash^=items[i].hashCode();
+        }
+        return hash;
     }
 
 }

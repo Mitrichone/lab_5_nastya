@@ -7,12 +7,12 @@ public class Drink extends MenuItem implements Alcoholable{
     private DrinkTypeEnum drinkType;
 
     public Drink(String name, DrinkTypeEnum e_DrinkType){
-        this(DEFAULT_INT,name,e_DrinkType,DEFAULT_STRING, DEFAULT_INT);
+        this(DEFAULT_INT,name,DEFAULT_STRING,e_DrinkType, DEFAULT_INT);
     }
     public Drink(int cost, String name, DrinkTypeEnum DrinkType, String description){
-        this(cost,name,DrinkType,description,DEFAULT_INT);
+        this(cost,name,description,DrinkType,DEFAULT_INT);
     }
-    public Drink(int cost, String name, DrinkTypeEnum DrinkType, String description, int alcoholVol){
+    public Drink(int cost, String name, String description, DrinkTypeEnum DrinkType,  int alcoholVol){
         super(cost, name, description);
         if(alcoholVol<0 || alcoholVol>100)
             throw  new IllegalArgumentException("Значение доли алкоголя лежит вне пределов [0,100]");

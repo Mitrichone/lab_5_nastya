@@ -40,7 +40,9 @@ public final class Customer {
     public String getName() {
         return name;
     }
-
+    public LocalDate getBirthDate(){
+        return birthDate;
+    }
     public String getSurname() {
         return surname;
     }

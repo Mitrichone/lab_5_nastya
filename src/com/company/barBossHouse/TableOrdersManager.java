@@ -1,5 +1,4 @@
 package com.company.barBossHouse;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -12,18 +11,16 @@ public class TableOrdersManager implements List<Order>,OrdersManager {
     private int size;
     private static final int DEFAULT_SIZE =0;
 
-    public TableOrdersManager(int length)throws NegativeSizeException{
-        if(length<0)
-            throw new NegativeSizeException("Размер массива не может быть отрицательным");
+    public TableOrdersManager(){
+    }
+    public TableOrdersManager(int length){
         tables = new TableOrder[length];
         size= DEFAULT_SIZE;
     }
-    //todo * код этого метода должен быть на строчке 203
     public Order ReturnOrder(int num){
         return tables[num];
     }
 
-    //todo * откуда берутся эти num?
     public void addItem(int num, MenuItem item) throws UnlawfulActionException{
         if(item instanceof Drink){
             Drink drink = (Drink)item;
@@ -33,7 +30,7 @@ public class TableOrdersManager implements List<Order>,OrdersManager {
                 throw new UnlawfulActionException();
             }
         }
-         tables[num].add(item);
+        tables[num].add(item);
     }
 
     public boolean isFreeTable(int num){
@@ -72,7 +69,6 @@ public class TableOrdersManager implements List<Order>,OrdersManager {
                 if(pos==size-1)throw new NoSuchElementException();
                 return tables[pos++];
             }
-            //todo * NoSuchElementException (когда доходим до последнего элемента)
 
         };
     }
@@ -89,11 +85,11 @@ public class TableOrdersManager implements List<Order>,OrdersManager {
 
     @Override
     public boolean add(Order order) {
-            throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException();
     }
 
     @Override
-    public boolean remove(Object o) {
+    public boolean remove(Object o)  {
         for (int i = 0; i < size; i++) {
             if (Objects.equals(tables[i], o)) {
                 tables[i] = null;
@@ -127,14 +123,12 @@ public class TableOrdersManager implements List<Order>,OrdersManager {
             if(contains(o))throw new AlreadyAddedException();
             tables[index++]=(Order)o;
         }
-            //todo * AlreadyAddedException
-            //todo *? идешь либо до первого эксепшена, либо до конца c, либо до конца this.orders
         return true;
     }
 
     @Override
     public boolean removeAll(Collection<?> c) {
-        //todo * отрефакторить аналогично order
+
         boolean changed = false;
         for (Object o: c) {
             if(contains(o)){
@@ -147,7 +141,7 @@ public class TableOrdersManager implements List<Order>,OrdersManager {
 
     @Override
     public boolean retainAll(Collection<?> c) {
-        //todo * отрефакторить аналогично order
+
         boolean changed = false;
         for (Order o: tables) {
             if(!c.contains(o)){
@@ -160,7 +154,6 @@ public class TableOrdersManager implements List<Order>,OrdersManager {
 
     @Override
     public void clear() {
-        //todo * ручками по массиву и null
         for(int i=0;i<tables.length;i++){
             tables[i]=null;
         }
@@ -224,7 +217,6 @@ public class TableOrdersManager implements List<Order>,OrdersManager {
 
     @Override
     public ListIterator<Order> listIterator(int index) {
-        //todo * аналогично итератору из TableOrder
         if(index < 0 || index > size)
             throw new IndexOutOfBoundsException();
 
@@ -316,7 +308,7 @@ public class TableOrdersManager implements List<Order>,OrdersManager {
         if(fromIndex == toIndex)
             return null;
 
-       TableOrdersManager subList = new TableOrdersManager(toIndex - fromIndex); //todo * тип TableOrderManager
+        TableOrdersManager subList = new TableOrdersManager(toIndex - fromIndex);
         ListIterator<Order> iterator = listIterator(fromIndex);
 
         while(iterator.previousIndex() < toIndex)
@@ -330,9 +322,8 @@ public class TableOrdersManager implements List<Order>,OrdersManager {
         for(int i=0;i<size;i++){
             count+=tables[i].numOfItems(item);
         }
-            return count;
+        return count;
     }
-    //todo * это есть метод remove на строчке 102 - удали нафиг
     public int removeAllOrders(Order table){
         int count=0;
         for(int i=0;i<size;i++) {
@@ -355,11 +346,11 @@ public class TableOrdersManager implements List<Order>,OrdersManager {
         }
         throw new NoFreeTableException("Все столики заняты!");
     }
-@Override
+    @Override
     public int customersAge(){
         int customerAge=0;
         int count=0;
-       for(int i =0;i<size;i++){
+        for(int i =0;i<size;i++){
             if(tables[i].hasAlcoholicDrink()){
                 customerAge += tables[i].getCustomer().getAge();
                 count++;
@@ -403,14 +394,14 @@ public class TableOrdersManager implements List<Order>,OrdersManager {
         }
         return orders;
     }
-  @Override
-  public int ordersByDateCount(LocalDate date){
+    @Override
+    public int ordersByDateCount(LocalDate date){
         int ordersByDateCount=0;
         for(int i=0;i<size;i++){
             if(tables[i].getDateTime().toLocalDate().isEqual(date))ordersByDateCount++;
         }
         return ordersByDateCount;
-  }
+    }
     public List<Order> ordersByDate(LocalDate date){
         ArrayList<Order>ordersByDate = new ArrayList<>();
         for(int i=0;i<size;i++){

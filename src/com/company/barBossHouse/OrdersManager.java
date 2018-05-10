@@ -9,6 +9,7 @@ import java.util.List;
 
 public interface OrdersManager extends Collection<Order> {
 int size();
+Order[] orders();
 int TotalCost();
 int numOfItems(String itemName);
 int numOfItems(MenuItem item);

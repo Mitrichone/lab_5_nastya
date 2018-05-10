@@ -32,8 +32,9 @@ public abstract class MenuItem implements Comparable<MenuItem>{
     public int compareTo(MenuItem o){
         return getCost() - o.getCost();
     }
+
     public String toString() {
-        return String.format("%1$s%2$s%3$d", !name.isEmpty() ? name : "",",", cost!=DEFAULT_COST ? cost : "").trim();
+        return String.format("%1$s%2$s%3$d%4$s", !name.isEmpty() ? name : "",",", cost, !description.isEmpty() ? description : "").trim();
     }
     public boolean equals(Object obj){
         if(obj!=null) {

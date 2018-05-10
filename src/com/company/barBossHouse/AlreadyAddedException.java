@@ -1,6 +1,6 @@
 package com.company.barBossHouse;
 
-public class AlreadyAddedException  extends RuntimeException {
+public class AlreadyAddedException  extends  RuntimeException {
     String string;
     AlreadyAddedException (){
 

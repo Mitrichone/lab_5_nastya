@@ -5,7 +5,6 @@ import java.util.*;
 
 public interface Order extends List<MenuItem>{
 
-
     boolean equals(Object obj);
     int hashCode();
 
@@ -19,5 +18,7 @@ public interface Order extends List<MenuItem>{
     Customer getCustomer();
     void setCustomer(Customer customer);
     LocalDateTime getDateTime();
+    String getType(int index);
+    MenuItem[] items();
 
 }
